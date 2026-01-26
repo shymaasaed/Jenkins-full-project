@@ -92,7 +92,7 @@ Workflow summary:
 
 ---
 
-## 🔄 CI/CD Workflow
+##  CI/CD Workflow
 
 ### Continuous Integration (Jenkins)
 
@@ -203,10 +203,10 @@ These are not default templates and were customized for this project.
 Since Jenkins runs locally, Ngrok is used to expose port 8080.
 ##  Screenshots
 ### GtiHub Webhook
-![GitHub Webhook](screenshots/ webhook.png)
-### Jenkins webhook trieger
+![GitHub Webhook](screenshots/webhook.png)
+### Jenkins  GitHub webhook 
 ![Jenkins Webhook](screenshots/hook-in-jenkins.png) 
-### Jenkins webhook trieger changes summry
+### Jenkins tregger changes summry
 ![Jenkins Webhook](screenshots/hook-in-jenkins2.png) 
 ### Jenkins Pipeline Stages
 ![Jenkins Pipeline](screenshots/pipeline-overview.png)
@@ -225,13 +225,13 @@ Since Jenkins runs locally, Ngrok is used to expose port 8080.
 ### Minikube & k8s Name spaces
 ![K8s Namespace](screenshots/k8s-ns.png)
 ### K8S apps namespce pods & svc created by Argo
-![K8s Pods](screenshots/k8s-pods.png)
+![K8s Pods](screenshots/k8s-app.png)
 ### Argo CD Dashboard
 ![Argo CD Dashboard](screenshots/argo.png)
 ### Argo CD Application Sync 1 replicaset
-![Argo CD Sync](screenshots/'image (2).png' )
+![Argo CD Sync](screenshots/image (2).png)
 ### Argo CD Application Sync 2 replicaset
-![Argo CD Sync 2](screenshots/'image (1).png')
+![Argo CD Sync 2](screenshots/image (1).png)
 ### Prometheus & Grafana Monitoring
 ![Prometheus Metrics](screenshots/prom-rules.png)
 ![Grafana Dashboard](screenshots/grafana-jenkins.png)
