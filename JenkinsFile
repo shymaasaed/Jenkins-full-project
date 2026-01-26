@@ -5,7 +5,7 @@ pipeline {
   environment {
     SONARQUBE_SERVER = "sonarqube"
     NEXUS_REPO_URL   = "http://localhost:8081/repository/spring-boot-app/"
-    REGISTRY         = "docker.io/YOUR_DOCKER_USERNAME"
+    REGISTRY         = "docker.io/shymaa145"
     IMAGE            = "spring-boot-app"
   }
 
