@@ -75,7 +75,7 @@ Workflow summary:
 
 ---
 
-## ✅ Prerequisites / Environment
+##  Prerequisites / Environment
 
 * CentOS VM
 * Docker
@@ -201,61 +201,48 @@ These are not default templates and were customized for this project.
 ##  GitHub Webhook + Ngrok
 
 Since Jenkins runs locally, Ngrok is used to expose port 8080.
-
-GitHub webhook points to:
-
-```
-https://<ngrok-url>/github-webhook/
-```
-
-This allows GitHub to notify Jenkins on every push.
-
----
-
 ##  Screenshots
+### GtiHub Webhook
+![GitHub Webhook](screenshots/ webhook.png)
+### Jenkins webhook trieger
+![Jenkins Webhook](screenshots/hook-in-jenkins.png) 
+### Jenkins webhook trieger changes summry
+![Jenkins Webhook](screenshots/hook-in-jenkins2.png) 
+### Jenkins Pipeline Stages
+![Jenkins Pipeline](screenshots/pipeline-overview.png)
+### Nexus artiphacts 
+![Nexus Artifacts](screenshots/nexus.png)
+### SonarQube Analysis
+![SonarQube Analysis](screenshots/sonar-output.png)
+### Docker Hub Image push 
+![Docker Hub Image](screenshots/docker-hub.png)
+### MUltistaged Docker image 
+### Before 
+![Docker Image Before](screenshots/old-image-size.png)
+### After 
+![Docker Image After](screenshots/new-image-size.png)
 
-Create a folder:
-
-```
-/screenshots
-```
-
-Include:
-
-### CI
-
-1. Jenkins Dashboard
-2. Jenkins Pipeline Stages
-3. Jenkins Successful Build
-4. SonarQube Project Result
-5. Nexus Uploaded Artifact
-6. Docker Hub Image
-7. Docker Hub Multistaged Image
-
-### Webhook
-
-7. Ngrok running terminal
-8. GitHub Webhook configuration
-9. GitHub webhook delivery success
-10. Jenkins GitHub Hook Log
-
-### CD
-
-11. Argo CD Applications view
-12. Argo CD Sync OK
-13. Kubernetes Pods
-14. Application running in browser
-
-### Monitoring
-
-15. Prometheus Targets
-16. Jenkins metric in Prometheus
-17. Grafana Jenkins Dashboard
-18. Grafana Cluster Dashboard
-19. Alertmanager UI
-20. Email alert received
-
----
+### Minikube & k8s Name spaces
+![K8s Namespace](screenshots/k8s-ns.png)
+### K8S apps namespce pods & svc created by Argo
+![K8s Pods](screenshots/k8s-pods.png)
+### Argo CD Dashboard
+![Argo CD Dashboard](screenshots/argo.png)
+### Argo CD Application Sync 1 replicaset
+![Argo CD Sync](screenshots/'image (2).png' )
+### Argo CD Application Sync 2 replicaset
+![Argo CD Sync 2](screenshots/'image (1).png')
+### Prometheus & Grafana Monitoring
+![Prometheus Metrics](screenshots/prom-rules.png)
+![Grafana Dashboard](screenshots/grafana-jenkins.png)
+### Alertmanager 
+![Grafana Dashboard](screenshots/grafana-alert.png)
+### Alertmanager mail 
+![Alertmanager Alerts](screenshots/alert-manger-mail.png)
+### Grafana mail 
+![Grafana Alerts](screenshots/grafana-mail.png)
+### spring-boot connection 
+![spring-boot connection](screenshots/spring-boot.png)
 
 ##  Project Goal
 
