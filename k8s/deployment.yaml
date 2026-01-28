@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: spring-boot-app
-          image: docker.io/shymaa145/spring-boot-app:latest
+          image: docker.io/shymaa145/spring-boot-app
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
