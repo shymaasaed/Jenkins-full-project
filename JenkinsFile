@@ -1,0 +1,184 @@
+pipeline {
+  agent any
+
+  environment {
+    NEXUS_REPO_URL = "http://localhost:8081/repository/spring-boot-app/"
+    REGISTRY = "docker.io/shymaa145"
+    IMAGE = "spring-boot-app"
+  }
+
+  tools {
+    maven 'maven'
+    jdk 'jdk17'
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/shymaasaed/Jenkins-full-project'
+      }
+    }
+
+    stage('Clean Sonar') {
+      steps {
+        sh 'rm -rf .scannerwork target/sonar'
+      }
+    }
+
+    stage('Build + Test + JaCoCo') {
+      steps {
+        sh 'mvn clean test jacoco:report'
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        withSonarQubeEnv('sonarqube') {
+          sh '''
+mvn sonar:sonar \
+-Dsonar.projectKey=spring-boot-app \
+-Dsonar.projectName=spring-boot-app \
+-Dsonar.sources=src/main/java \
+-Dsonar.tests=src/test/java \
+-Dsonar.java.binaries=target/classes \
+-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+'''
+        }
+      }
+    }
+
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 10, unit: 'MINUTES') {
+          script {
+            def qg = waitForQualityGate()
+            echo "Sonar Quality Gate: ${qg.status}"
+
+            if (qg.status != 'OK') {
+              error "SonarQube Quality Gate FAILED: ${qg.status}"
+            }
+          }
+        }
+      }
+    }
+
+    stage('Publish to Nexus') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'nexus-creds',
+          usernameVariable: 'NEXUS_USER',
+          passwordVariable: 'NEXUS_PASS')]) {
+
+          sh '''
+cat > settings.xml <<EOF
+<settings>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+  </servers>
+</settings>
+EOF
+
+mvn -B -DskipTests deploy \
+-s settings.xml \
+-DaltDeploymentRepository=nexus::default::${NEXUS_REPO_URL}
+'''
+        }
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        sh 'docker build -t $REGISTRY/$IMAGE:$BUILD_NUMBER .'
+      }
+    }
+
+    stage('Run App') {
+      steps {
+        sh '''
+docker run -d --rm --name app-test \
+-p 8090:8090 \
+$REGISTRY/$IMAGE:$BUILD_NUMBER
+
+sleep 10
+'''
+      }
+    }
+
+    stage('Stress Test (k6)') {
+      steps {
+        script {
+          def rc = sh(
+            script: '''
+docker run --rm --network host \
+-v $WORKSPACE/stress.js:/stress.js \
+grafana/k6 run /stress.js
+''',
+            returnStatus: true
+          )
+
+          if (rc != 0) {
+            error "Stress Test FAILED (k6)"
+          }
+
+          echo "Stress Test PASSED"
+        }
+      }
+    }
+
+    stage('Trivy Scan') {
+      steps {
+        script {
+          sh 'mkdir -p /var/lib/jenkins/.cache/trivy'
+
+          def trivyRC = sh(
+            script: '''
+trivy image \
+--cache-dir /var/lib/jenkins/.cache/trivy \
+--severity HIGH,CRITICAL \
+--exit-code 1 \
+$REGISTRY/$IMAGE:$BUILD_NUMBER
+''',
+            returnStatus: true
+          )
+
+          if (trivyRC != 0) {
+            error "Trivy FAILED: HIGH / CRITICAL vulnerabilities detected"
+          }
+
+          echo "Trivy Scan PASSED"
+        }
+      }
+    }
+
+    stage('Docker Push') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'shymaa145',
+          usernameVariable: 'USER',
+          passwordVariable: 'PASS')]) {
+
+          sh '''
+echo $PASS | docker login -u $USER --password-stdin
+docker push $REGISTRY/$IMAGE:$BUILD_NUMBER
+'''
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      echo "Stopping test container..."
+      sh 'docker stop app-test || true'
+
+      junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+
+      archiveArtifacts artifacts: '**/target/*.jar',
+        fingerprint: true,
+        allowEmptyArchive: true
+    }
+  }
+}
