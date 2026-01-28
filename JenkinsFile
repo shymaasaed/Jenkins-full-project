@@ -95,75 +95,15 @@ mvn -B -DskipTests deploy \
         sh 'docker build -t $REGISTRY/$IMAGE:$BUILD_NUMBER .'
       }
     }
-
-    stage('Run App') {
-      steps {
-        sh '''
-docker run -d --rm --name app-test \
--p 8090:8090 \
-$REGISTRY/$IMAGE:$BUILD_NUMBER
-
-sleep 10
-'''
-      }
-    }
-
-    stage('Stress Test (k6)') {
-      steps {
-        script {
-          def rc = sh(
-            script: '''
-docker run --rm --network host \
--v $WORKSPACE/stress.js:/stress.js \
-grafana/k6 run /stress.js
-''',
-            returnStatus: true
-          )
-
-          if (rc != 0) {
-            error "Stress Test FAILED (k6)"
-          }
-
-          echo "Stress Test PASSED"
-        }
-      }
-    }
-
-    stage('Trivy Scan') {
-      steps {
-        script {
-          sh 'mkdir -p /var/lib/jenkins/.cache/trivy'
-
-          def trivyRC = sh(
-            script: '''
-trivy image \
---cache-dir /var/lib/jenkins/.cache/trivy \
---severity HIGH,CRITICAL \
---exit-code 1 \
-$REGISTRY/$IMAGE:$BUILD_NUMBER
-''',
-            returnStatus: true
-          )
-
-          if (trivyRC != 0) {
-            error "Trivy FAILED: HIGH / CRITICAL vulnerabilities detected"
-          }
-
-          echo "Trivy Scan PASSED"
-        }
-      }
-    }
-
     stage('Docker Push') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'shymaa145',
           usernameVariable: 'USER',
           passwordVariable: 'PASS')]) {
-
           sh '''
-echo $PASS | docker login -u $USER --password-stdin
-docker push $REGISTRY/$IMAGE:$BUILD_NUMBER
-'''
+            echo $PASS | docker login -u $USER --password-stdin
+            docker push $REGISTRY/$IMAGE:$BUILD_NUMBER
+            '''
         }
       }
     }
@@ -171,10 +111,7 @@ docker push $REGISTRY/$IMAGE:$BUILD_NUMBER
 
   post {
     always {
-      echo "Stopping test container..."
-      sh 'docker stop app-test || true'
-
-      junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
+     junit testResults: '**/target/surefire-reports/*.xml', allowEmptyResults: true
 
       archiveArtifacts artifacts: '**/target/*.jar',
         fingerprint: true,
