@@ -153,20 +153,6 @@ $REGISTRY/$IMAGE:$BUILD_NUMBER
         }
       }
     }
-
-    stage('Docker Push') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'shymaa145',
-          usernameVariable: 'USER',
-          passwordVariable: 'PASS')]) {
-
-          sh '''
-echo $PASS | docker login -u $USER --password-stdin
-docker push $REGISTRY/$IMAGE:$BUILD_NUMBER
-'''
-        }
-      }
-    }
   }
 
   post {
